@@ -65,14 +65,31 @@ public class OuyaGameObject : MonoBehaviour
                 GameObject ouyaGameObject = GameObject.Find("OuyaGameObject");
                 if (ouyaGameObject)
                 {
-                    m_instance = ouyaGameObject.GetComponent<OuyaGameObject>();
+                    Singleton = ouyaGameObject.GetComponent<OuyaGameObject>();
                 }
             }
             return m_instance;
         }
+        private set {
+            if (null != m_instance)
+            {
+                Debug.LogWarning(string.Format("Multiple OuyaGameObject instances found! old:{0}, new:{1} Destroying new!", Singleton, value), Singleton);
+                Destroy(value.gameObject);
+            }
+            else
+            {
+                m_instance = value;
+				Debug.Log(string.Format("OuyaGameObject Singleton:{0}", value), Singleton);
+            }
+        }
     }
     #endregion 
-     
+
+    public override string ToString()
+    {
+        return string.Format("OuyaGameObject(instanceId:{0})", GetInstanceID());
+    }
+
     #region Java To Unity Event Handlers
 
     public void onMenuButtonUp(string ignore)
@@ -233,7 +250,7 @@ public class OuyaGameObject : MonoBehaviour
     #region UNITY Awake, Start & Update
     void Awake()
     {
-        m_instance = this;
+        Singleton = this;
     }
     void Start()
     {
