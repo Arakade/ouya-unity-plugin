@@ -16,53 +16,61 @@
 
 using UnityEngine;
 
+[ExecuteInEditMode]
 public class OuyaSetResolution : MonoBehaviour
 {
     private bool m_fullScreen = true;
-
+    
+    private Matrix4x4 m_textWarningMatrix = Matrix4x4.Scale(new Vector3(1.5f, 1.2f, 1f));
+    
     public void OnGUI()
     {
         GUILayout.Label(string.Empty);
         GUILayout.Label(string.Empty);
         GUILayout.Label(string.Empty);
-        GUILayout.Label(string.Empty);
-
+        
         GUILayout.BeginHorizontal();
-        GUILayout.Space(400);
+        GUILayout.Space(130);
+        GUI.matrix = m_textWarningMatrix;
+        GUI.contentColor = new Color(0.8f, 0f, 0f);
+        GUILayout.Label("Warning: Selecting anything other than \"Set Both\"\n will likely make mouse aiming inaccurate!");
+        GUI.contentColor = Color.black;
+        GUI.matrix = Matrix4x4.identity;
+        GUILayout.EndHorizontal();
+        
+        GUILayout.Label(string.Empty);
+        GUILayout.Label(string.Empty);
+        
+        GUILayout.BeginHorizontal();
+        GUILayout.Space(300);
         m_fullScreen = GUILayout.Toggle(m_fullScreen, "FullScreen?", GUILayout.Height(40));
         GUILayout.EndHorizontal();
-
+        
+        buildResolutionOption(640, 480);
+        buildResolutionOption(1280, 720);
+        buildResolutionOption(1920, 1080);
+    }
+    
+    private void buildResolutionOption(int width, int height)
+    {
         GUILayout.Label(string.Empty);
-
         GUILayout.BeginHorizontal();
-        GUILayout.Space(400);
-        if (GUILayout.Button("Set Resolution 480p", GUILayout.Height(40)))
+        GUILayout.Space(200);
+        GUILayout.Label(string.Format(" {0} : ", height));
+        if (GUILayout.Button("Set Unity Resolution"))
         {
-            Screen.SetResolution(640, 480, m_fullScreen);
-            OuyaSDK.OuyaJava.JavaSetResolution("640x480");
+            Screen.SetResolution(width, height, m_fullScreen);
         }
-        GUILayout.EndHorizontal();
-
-        GUILayout.Label(string.Empty);
-
-        GUILayout.BeginHorizontal();
-        GUILayout.Space(400);
-        if (GUILayout.Button("Set Resolution 720p", GUILayout.Height(40)))
+        if (GUILayout.Button("Set Java Resolution"))
         {
-            Screen.SetResolution(1280, 720, m_fullScreen);
-            OuyaSDK.OuyaJava.JavaSetResolution("1280x720");
+            OuyaSDK.OuyaJava.JavaSetResolution(string.Format("{0}x{1}", width, height));
         }
-        GUILayout.EndHorizontal();
-
-        GUILayout.Label(string.Empty);
-
-        GUILayout.BeginHorizontal();
-        GUILayout.Space(400);
-        if (GUILayout.Button("Set Resolution 1080p", GUILayout.Height(40)))
+        if (GUILayout.Button("Set Both"))
         {
-            Screen.SetResolution(1920, 1080, m_fullScreen);
-            OuyaSDK.OuyaJava.JavaSetResolution("1920x1080");
+            Screen.SetResolution(width, height, m_fullScreen);
+            OuyaSDK.OuyaJava.JavaSetResolution(string.Format("{0}x{1}", width, height));
         }
         GUILayout.EndHorizontal();
     }
+    
 }
