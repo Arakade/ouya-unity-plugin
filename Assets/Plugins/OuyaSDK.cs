@@ -26,7 +26,7 @@ using UnityEngine;
 
 public static class OuyaSDK
 {
-    public const string VERSION = "1.0.7.4";
+    public const string VERSION = "1.0.9.1";
 
     /// <summary>
     /// Cache joysticks
@@ -518,6 +518,21 @@ public static class OuyaSDK
         OuyaSDK.OuyaJava.JavaFetchGamerUUID();
     }
 
+    public static void showCursor(bool flag)
+    {
+        OuyaSDK.OuyaJava.JavaShowCursor(flag);
+    }
+
+    public static void putGameData(string key, string val)
+    {
+        OuyaSDK.OuyaJava.JavaPutGameData(key, val);
+    }
+
+    public static string getGameData(string key)
+    {
+        return OuyaSDK.OuyaJava.JavaGetGameData(key);
+    }
+
     public static void requestProductList(List<Purchasable> purchasables)
     {
         foreach (Purchasable purchasable in purchasables)
@@ -580,9 +595,12 @@ public static class OuyaSDK
     [Serializable]
     public class Product
     {
+        public string currencyCode = string.Empty;
         public string identifier = string.Empty;
-        public string name = string.Empty;
+        public float localPrice = 0f;
+        public string name = string.Empty;        
         public int priceInCents = 0;
+        public int productVersionToBundle = 0;
 
         public string getIdentifier()
         {
@@ -618,11 +636,13 @@ public static class OuyaSDK
     [Serializable]
     public class Receipt
     {
+        public string currency = string.Empty;
+        public string gamer = string.Empty;
+        public DateTime generatedDate = DateTime.MinValue;
         public string identifier = string.Empty;
+        public float localPrice = 0f;
         public int priceInCents = 0;
         public DateTime purchaseDate = DateTime.MinValue;
-        public DateTime generatedDate = DateTime.MinValue;
-        public string gamer = string.Empty;
         public string uuid = string.Empty;
 
         public string getIdentifier()
@@ -1039,7 +1059,7 @@ public static class OuyaSDK
 #endif
         }
 
-        public static void JavaOuyaFacadePutData(string key, string val)
+        public static void JavaShowCursor(bool flag)
         {
 #if UNITY_ANDROID && !UNITY_EDITOR && !UNITY_STANDALONE_OSX && !UNITY_STANDALONE_WIN && !UNITY_STANDALONE_LINUX
 
@@ -1050,15 +1070,15 @@ public static class OuyaSDK
 
             try
             {
-                Debug.Log("JavaOuyaFacadePutData");
+                //Debug.Log("JavaShowCursor");
                 using (AndroidJavaClass ajc = new AndroidJavaClass(JAVA_CLASS))
                 {
-                    ajc.CallStatic<String>("ouyaFacadePutData", new object[] { key + "\0", val + "\0" });
+                    ajc.CallStatic("showCursor", new object[] { flag.ToString() });
                 }
             }
             catch (Exception ex)
             {
-                Debug.LogError(string.Format("OuyaSDK.JavaOuyaFacadePutData exception={0}", ex));
+                Debug.LogError(string.Format("OuyaSDK.JavaShowCursor exception={0}", ex));
             }
             finally
             {
@@ -1067,7 +1087,35 @@ public static class OuyaSDK
 #endif
         }
 
-        public static string JavaOuyaFacadeGetData(string key)
+        public static void JavaPutGameData(string key, string val)
+        {
+#if UNITY_ANDROID && !UNITY_EDITOR && !UNITY_STANDALONE_OSX && !UNITY_STANDALONE_WIN && !UNITY_STANDALONE_LINUX
+
+            // again, make sure the thread is attached..
+            AndroidJNI.AttachCurrentThread();
+
+            AndroidJNI.PushLocalFrame(0);
+
+            try
+            {
+                Debug.Log("JavaPutGameData");
+                using (AndroidJavaClass ajc = new AndroidJavaClass(JAVA_CLASS))
+                {
+                    ajc.CallStatic("putGameData", new object[] { key + "\0", val + "\0" });
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError(string.Format("OuyaSDK.JavaPutGameData exception={0}", ex));
+            }
+            finally
+            {
+                AndroidJNI.PopLocalFrame(IntPtr.Zero);
+            }
+#endif
+        }
+
+        public static string JavaGetGameData(string key)
         {
             string result = string.Empty;
 
@@ -1080,15 +1128,15 @@ public static class OuyaSDK
 
             try
             {
-                Debug.Log("JavaOuyaFacadeGetData");
+                Debug.Log("JavaGetGameData");
                 using (AndroidJavaClass ajc = new AndroidJavaClass(JAVA_CLASS))
                 {
-                    result = ajc.CallStatic<String>("ouyaFacadeGetData", new object[] { key + "\0" });
+                    result = ajc.CallStatic<String>("getGameData", new object[] { key + "\0" });
                 }
             }
             catch (Exception ex)
             {
-                Debug.LogError(string.Format("OuyaSDK.JavaOuyaFacadeGetData exception={0}", ex));
+                Debug.LogError(string.Format("OuyaSDK.JavaGetGameData exception={0}", ex));
             }
             finally
             {
